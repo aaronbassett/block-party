@@ -1,1 +1,5 @@
-export const myPackage = (taco = ''): string => `${taco} from my package`;
+// Block Party - Lean block orchestration library
+export * from './types';
+export * from './store';
+export { BlockManager } from './BlockManager';
+export * from './utils';

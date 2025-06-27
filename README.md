@@ -1,117 +1,365 @@
-# typescript-npm-package-template
+# Block Party 🎉
 
-> Template to kickstart creating a Node.js module using TypeScript and VSCode
+> Lean block orchestration library for React - manages content blocks with single edit mode, limits, and drag & drop
 
-Inspired by [node-module-boilerplate](https://github.com/sindresorhus/node-module-boilerplate)
+Block Party provides a flexible orchestration system for managing blocks of content in React applications. It handles the coordination of multiple block types, enforces single edit mode across all blocks, manages block limits per type, and provides a clean API for external components to interact with blocks.
 
 ## Features
 
-- [Semantic Release](https://github.com/semantic-release/semantic-release)
-- [Issue Templates](https://github.com/ryansonshine/typescript-npm-package-template/tree/main/.github/ISSUE_TEMPLATE)
-- [GitHub Actions](https://github.com/ryansonshine/typescript-npm-package-template/tree/main/.github/workflows)
-- [Codecov](https://about.codecov.io/)
-- [VSCode Launch Configurations](https://github.com/ryansonshine/typescript-npm-package-template/blob/main/.vscode/launch.json)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Husky](https://github.com/typicode/husky)
-- [Lint Staged](https://github.com/okonet/lint-staged)
-- [Commitizen](https://github.com/search?q=commitizen)
-- [Jest](https://jestjs.io/)
-- [ESLint](https://eslint.org/)
-- [Prettier](https://prettier.io/)
+- 🎯 **Single Edit Mode** - Only one block can be edited at a time across all managers
+- 🚫 **Block Limits** - Enforce maximum blocks per type
+- 🔄 **Drag & Drop** - Reorder blocks with keyboard and mouse support
+- 📦 **State Tracking** - Track block states: empty, dirty, clean
+- ⌨️ **Keyboard Navigation** - Full keyboard support with Tab/Enter
+- 🪶 **Lightweight** - ~400 lines of code, minimal dependencies
+- 🔌 **Flexible** - Bring your own block implementations
 
-## Getting started
+## What This Library Does
 
-### Set up your repository
+- Orchestrates multiple block managers on a page
+- Enforces single edit mode across all blocks
+- Manages block limits per type
+- Coordinates focus navigation between blocks
+- Provides a clean API for adding, removing, and updating blocks
+- Handles block reordering with drag & drop
 
-**Click the "Use this template" button.**
+## What This Library Does NOT Do
 
-Alternatively, create a new directory and then run:
+- Does NOT implement specific block types (that's your responsibility)
+- Does NOT handle persistence (blocks must bring their own save functions)
+- Does NOT manage block UI (blocks render themselves)
+- Does NOT validate block data (blocks handle their own validation)
 
-```bash
-curl -fsSL https://github.com/ryansonshine/typescript-npm-package-template/archive/main.tar.gz | tar -xz --strip-components=1
-```
-
-Replace `FULL_NAME`, `GITHUB_USER`, and `REPO_NAME` in the script below with your own details to personalize your new package:
-
-```bash
-FULL_NAME="John Smith"
-GITHUB_USER="johnsmith"
-REPO_NAME="my-cool-package"
-sed -i.mybak "s/\([\/\"]\)(ryansonshine)/$GITHUB_USER/g; s/typescript-npm-package-template\|my-package-name/$REPO_NAME/g; s/Ryan Sonshine/$FULL_NAME/g" package.json package-lock.json README.md
-rm *.mybak
-```
-
-### Add NPM Token
-
-Add your npm token to your GitHub repository secrets as `NPM_TOKEN`.
-
-### Add Codecov integration
-
-Enable the Codecov GitHub App [here](https://github.com/apps/codecov).
-
-**Remove everything from here and above**
-
----
-
-# my-package-name
-
-[![npm package][npm-img]][npm-url]
-[![Build Status][build-img]][build-url]
-[![Downloads][downloads-img]][downloads-url]
-[![Issues][issues-img]][issues-url]
-[![Code Coverage][codecov-img]][codecov-url]
-[![Commitizen Friendly][commitizen-img]][commitizen-url]
-[![Semantic Release][semantic-release-img]][semantic-release-url]
-
-> My awesome module
-
-## Install
+## Installation
 
 ```bash
-npm install my-package-name
+npm install block-party
+# or
+yarn add block-party
+# or
+pnpm add block-party
 ```
 
-## Usage
+## Quick Start
 
-```ts
-import { myPackage } from 'my-package-name';
+```tsx
+import { BlockManager, useBlockStore } from 'block-party';
+import type { BlockConfig, BlockEditProps, BlockRenderProps } from 'block-party';
 
-myPackage('hello');
-//=> 'hello from my package'
+// Define your block data type
+interface TextBlockData {
+  content: string;
+}
+
+// Create view component
+const TextBlockView: React.FC<BlockRenderProps<TextBlockData>> = ({ block }) => (
+  <div>{block.data.content || 'Click to edit...'}</div>
+);
+
+// Create edit component
+const TextBlockEdit: React.FC<BlockEditProps<TextBlockData>> = ({
+  block,
+  onChange,
+  onSave,
+  onCancel,
+}) => (
+  <div>
+    <input
+      value={block.data.content}
+      onChange={(e) => onChange({ content: e.target.value })}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onSave();
+        if (e.key === 'Escape') onCancel();
+      }}
+    />
+    <button onClick={onSave}>Save</button>
+    <button onClick={onCancel}>Cancel</button>
+  </div>
+);
+
+// Create block configuration
+const textBlockConfig: BlockConfig<TextBlockData> = {
+  type: 'text',
+  displayName: 'Text Block',
+  maxBlocks: 5,
+  renderView: (props) => <TextBlockView {...props} />,
+  renderEdit: (props) => <TextBlockEdit {...props} />,
+  createDefault: () => ({ content: '' }),
+  validate: (data) => data.content.length <= 1000,
+  onSave: async (block) => {
+    // Optional: persist to backend
+    console.log('Saving block:', block);
+  },
+};
+
+// Use in your app
+function App() {
+  return (
+    <BlockManager
+      type="text"
+      config={textBlockConfig}
+      onError={(error) => console.error(error)}
+    />
+  );
+}
 ```
 
-## API
+## API Reference
 
-### myPackage(input, options?)
+### Types
 
-#### input
+#### `Block<T>`
+Core block interface with state management:
 
-Type: `string`
+```typescript
+interface Block<T = unknown> {
+  id: string;
+  type: string;
+  data: T;
+  order: number;
+  state: 'empty' | 'dirty' | 'clean';
+  isEditing: boolean;
+  createdAt: number;
+  updatedAt: number;
+  savedAt?: number;
+}
+```
 
-Lorem ipsum.
+#### `BlockConfig<T>`
+Configuration for each block type:
 
-#### options
+```typescript
+interface BlockConfig<T = unknown> {
+  type: string;
+  displayName: string;
+  maxBlocks?: number;
+  
+  // Render functions
+  renderView: (props: BlockRenderProps<T>) => ReactElement;
+  renderEdit: (props: BlockEditProps<T>) => ReactElement;
+  
+  // Lifecycle functions
+  createDefault: () => T;
+  validate?: (data: T) => boolean;
+  onSave?: (block: Block<T>) => Promise<void>;
+}
+```
 
-Type: `object`
+### Components
 
-##### postfix
+#### `<BlockManager>`
+Main component for managing blocks of a specific type:
 
-Type: `string`
-Default: `rainbows`
+```tsx
+<BlockManager
+  type="text"
+  config={blockConfig}
+  className="my-blocks"
+  onError={(error) => console.error(error)}
+/>
+```
 
-Lorem ipsum.
+### Store
 
-[build-img]:https://github.com/ryansonshine/typescript-npm-package-template/actions/workflows/release.yml/badge.svg
-[build-url]:https://github.com/ryansonshine/typescript-npm-package-template/actions/workflows/release.yml
-[downloads-img]:https://img.shields.io/npm/dt/typescript-npm-package-template
-[downloads-url]:https://www.npmtrends.com/typescript-npm-package-template
-[npm-img]:https://img.shields.io/npm/v/typescript-npm-package-template
-[npm-url]:https://www.npmjs.com/package/typescript-npm-package-template
-[issues-img]:https://img.shields.io/github/issues/ryansonshine/typescript-npm-package-template
-[issues-url]:https://github.com/ryansonshine/typescript-npm-package-template/issues
-[codecov-img]:https://codecov.io/gh/ryansonshine/typescript-npm-package-template/branch/main/graph/badge.svg
-[codecov-url]:https://codecov.io/gh/ryansonshine/typescript-npm-package-template
-[semantic-release-img]:https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
-[semantic-release-url]:https://github.com/semantic-release/semantic-release
-[commitizen-img]:https://img.shields.io/badge/commitizen-friendly-brightgreen.svg
-[commitizen-url]:http://commitizen.github.io/cz-cli/
+Access the global block store using the `useBlockStore` hook:
+
+```tsx
+const store = useBlockStore();
+
+// Add a block
+const blockId = store.addBlock('text');
+
+// Update block data
+store.updateBlockData(blockId, { content: 'Hello' });
+
+// Enable edit mode (disables others)
+store.enableBlockEdit(blockId);
+
+// Save block
+await store.saveBlock(blockId);
+
+// Query blocks
+const textBlocks = store.getBlocksByType('text');
+const canAdd = store.canAddBlock('text');
+```
+
+## Advanced Example
+
+Here's a more complete example with multiple block types:
+
+```tsx
+import { BlockManager, useBlockStore } from 'block-party';
+import type { BlockConfig } from 'block-party';
+
+// Text block implementation
+const textBlockConfig: BlockConfig<{ content: string; format: string }> = {
+  type: 'text',
+  displayName: 'Text',
+  maxBlocks: 10,
+  renderView: ({ block }) => (
+    <div className={`text-${block.data.format}`}>
+      {block.data.content}
+    </div>
+  ),
+  renderEdit: ({ block, onChange, onSave, onCancel }) => (
+    <div>
+      <textarea
+        value={block.data.content}
+        onChange={(e) => onChange({ ...block.data, content: e.target.value })}
+      />
+      <select
+        value={block.data.format}
+        onChange={(e) => onChange({ ...block.data, format: e.target.value })}
+      >
+        <option value="normal">Normal</option>
+        <option value="heading">Heading</option>
+        <option value="quote">Quote</option>
+      </select>
+      <button onClick={onSave}>Save</button>
+      <button onClick={onCancel}>Cancel</button>
+    </div>
+  ),
+  createDefault: () => ({ content: '', format: 'normal' }),
+  validate: (data) => data.content.length > 0 && data.content.length <= 5000,
+};
+
+// Image block implementation
+const imageBlockConfig: BlockConfig<{ url: string; alt: string }> = {
+  type: 'image',
+  displayName: 'Image',
+  maxBlocks: 5,
+  renderView: ({ block }) => (
+    <img src={block.data.url} alt={block.data.alt} />
+  ),
+  renderEdit: ({ block, onChange, onSave, onCancel }) => (
+    <div>
+      <input
+        placeholder="Image URL"
+        value={block.data.url}
+        onChange={(e) => onChange({ ...block.data, url: e.target.value })}
+      />
+      <input
+        placeholder="Alt text"
+        value={block.data.alt}
+        onChange={(e) => onChange({ ...block.data, alt: e.target.value })}
+      />
+      <button onClick={onSave}>Save</button>
+      <button onClick={onCancel}>Cancel</button>
+    </div>
+  ),
+  createDefault: () => ({ url: '', alt: '' }),
+  validate: (data) => data.url.startsWith('http'),
+};
+
+// Page component with multiple block types
+function Page() {
+  const store = useBlockStore();
+  
+  return (
+    <div className="page">
+      <h1>My Page</h1>
+      
+      <section>
+        <h2>Text Blocks</h2>
+        <BlockManager type="text" config={textBlockConfig} />
+      </section>
+      
+      <section>
+        <h2>Image Blocks</h2>
+        <BlockManager type="image" config={imageBlockConfig} />
+      </section>
+      
+      <button onClick={() => {
+        // Save all blocks
+        const allBlocks = [
+          ...store.getBlocksByType('text'),
+          ...store.getBlocksByType('image'),
+        ];
+        console.log('Saving all blocks:', allBlocks);
+      }}>
+        Save Page
+      </button>
+    </div>
+  );
+}
+```
+
+## Block States
+
+Blocks have three states that help track their lifecycle:
+
+- **`empty`** - New block with default data
+- **`dirty`** - Block has unsaved changes
+- **`clean`** - Block has been saved
+
+You can check block state using the utility functions:
+
+```tsx
+import { isBlockEmpty, isBlockDirty, isBlockClean } from 'block-party';
+
+const block = store.getBlock(blockId);
+if (isBlockDirty(block)) {
+  console.log('Block has unsaved changes');
+}
+```
+
+## Keyboard Support
+
+- **Tab/Shift+Tab** - Navigate between blocks
+- **Enter** - Enter edit mode on focused block
+- **Escape** - Cancel editing (in your edit component)
+- **Ctrl/Cmd+S** - Save block (in your edit component)
+
+## Styling
+
+Block Party is unstyled by default. Add your own CSS:
+
+```css
+/* Example styles */
+.block-container {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.block-container:focus {
+  outline: 2px solid blue;
+}
+
+.block-container[aria-grabbed="true"] {
+  opacity: 0.5;
+}
+
+.add-block-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border: 2px dashed #ccc;
+  background: none;
+  cursor: pointer;
+}
+```
+
+## TypeScript
+
+Block Party is written in TypeScript and provides full type safety:
+
+```tsx
+import type { Block, BlockConfig, BlockEditProps, BlockRenderProps } from 'block-party';
+
+// Define your block data type
+interface MyBlockData {
+  title: string;
+  content: string;
+}
+
+// Components get fully typed props
+const MyBlockEdit: React.FC<BlockEditProps<MyBlockData>> = ({ block, onChange }) => {
+  // block.data is typed as MyBlockData
+  return <input value={block.data.title} onChange={(e) => onChange({ ...block.data, title: e.target.value })} />;
+};
+```
+
+## License
+
+MIT © Aaron Bassett
