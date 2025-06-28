@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { fn } from '@storybook/test';
 import type { BlockConfig, BlockEditProps, BlockRenderProps } from '../../src';
 
 export interface CodeBlockData {
@@ -59,14 +60,38 @@ export const CodeBlockEdit: React.FC<BlockEditProps<CodeBlockData>> = ({
   onCancel,
 }) => {
   const [localData, setLocalData] = useState(block.data);
+  const [initialData] = useState(block.data);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSave = () => {
     onChange(localData);
     onSave();
   };
 
+  const handleCancel = () => {
+    // Reset to initial data
+    onChange(initialData);
+    onCancel();
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      // Click outside - keep changes but exit edit mode
+      onChange(localData);
+      onCancel();
+    }
+  };
+
+  useEffect(() => {
+    // Listen for clicks outside
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [localData]);
+
   return (
-    <div className="p-4 border-2 border-blue-500 rounded">
+    <div ref={containerRef} className="p-4 border-2 border-blue-500 rounded">
       <div className="flex gap-2 mb-3">
         <select
           className="px-3 py-1 border rounded"
@@ -102,11 +127,16 @@ export const CodeBlockEdit: React.FC<BlockEditProps<CodeBlockData>> = ({
               e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2;
             }, 0);
           }
-          if (e.key === 's' && e.metaKey) {
+          if (e.key === 's' && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();
             handleSave();
           }
-          if (e.key === 'Escape') onCancel();
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            // Escape - keep changes but exit edit mode
+            onChange(localData);
+            onCancel();
+          }
         }}
         placeholder="Enter code..."
         rows={12}
@@ -123,7 +153,7 @@ export const CodeBlockEdit: React.FC<BlockEditProps<CodeBlockData>> = ({
         </button>
         <button
           className="px-4 py-2 border rounded hover:bg-gray-100"
-          onClick={onCancel}
+          onClick={handleCancel}
         >
           Cancel (Esc)
         </button>
@@ -140,8 +170,8 @@ export const codeBlockConfig: BlockConfig<CodeBlockData> = {
   renderEdit: (props) => <CodeBlockEdit {...props} />,
   createDefault: () => ({ code: '', language: 'javascript' }),
   validate: (data) => data.code.length <= 10000,
-  onSave: async (block) => {
+  onSave: fn().mockImplementation(async (block) => {
     console.log('Saving code block:', block);
     await new Promise(resolve => setTimeout(resolve, 500));
-  },
+  }),
 };

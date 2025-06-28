@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { fn } from '@storybook/test';
 import type { BlockConfig, BlockEditProps, BlockRenderProps } from '../../src';
 
 export interface TextBlockData {
@@ -33,22 +34,54 @@ export const TextBlockEdit: React.FC<BlockEditProps<TextBlockData>> = ({
   onCancel,
 }) => {
   const [localData, setLocalData] = useState(block.data);
+  const [initialData] = useState(block.data);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSave = () => {
     onChange(localData);
     onSave();
   };
 
+  const handleCancel = () => {
+    // Reset to initial data
+    onChange(initialData);
+    onCancel();
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      // Click outside - keep changes but exit edit mode
+      onChange(localData);
+      onCancel();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      // Escape - keep changes but exit edit mode
+      onChange(localData);
+      onCancel();
+    }
+  };
+
+  useEffect(() => {
+    // Listen for clicks outside
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [localData]);
+
   return (
-    <div className="p-4 border-2 border-blue-500 rounded">
+    <div ref={containerRef} className="p-4 border-2 border-blue-500 rounded" onKeyDown={handleKeyDown}>
       <textarea
         className="w-full p-2 border rounded mb-2"
         value={localData.content}
         onChange={(e) => setLocalData({ ...localData, content: e.target.value })}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && e.metaKey) handleSave();
-          if (e.key === 'Escape') onCancel();
-        }}
         placeholder="Enter text content..."
         rows={4}
         autoFocus
@@ -73,7 +106,7 @@ export const TextBlockEdit: React.FC<BlockEditProps<TextBlockData>> = ({
         </button>
         <button
           className="px-4 py-2 border rounded hover:bg-gray-100"
-          onClick={onCancel}
+          onClick={handleCancel}
         >
           Cancel (Esc)
         </button>
@@ -90,9 +123,9 @@ export const textBlockConfig: BlockConfig<TextBlockData> = {
   renderEdit: (props) => <TextBlockEdit {...props} />,
   createDefault: () => ({ content: '', format: 'normal' }),
   validate: (data) => data.content.length <= 5000,
-  onSave: async (block) => {
+  onSave: fn().mockImplementation(async (block) => {
     console.log('Saving text block:', block);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
-  },
+  }),
 };

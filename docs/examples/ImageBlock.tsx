@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { fn } from '@storybook/test';
 import type { BlockConfig, BlockEditProps, BlockRenderProps } from '../../src';
 
 export interface ImageBlockData {
@@ -57,15 +58,51 @@ export const ImageBlockEdit: React.FC<BlockEditProps<ImageBlockData>> = ({
   onCancel,
 }) => {
   const [localData, setLocalData] = useState(block.data);
+  const [initialData] = useState(block.data);
   const [preview, setPreview] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleSave = () => {
     onChange(localData);
     onSave();
   };
 
+  const handleCancel = () => {
+    // Reset to initial data
+    onChange(initialData);
+    onCancel();
+  };
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      // Click outside - keep changes but exit edit mode
+      onChange(localData);
+      onCancel();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      // Escape - keep changes but exit edit mode
+      onChange(localData);
+      onCancel();
+    }
+  };
+
+  useEffect(() => {
+    // Listen for clicks outside
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [localData]);
+
   return (
-    <div className="p-4 border-2 border-blue-500 rounded">
+    <div ref={containerRef} className="p-4 border-2 border-blue-500 rounded" onKeyDown={handleKeyDown}>
       <div className="space-y-3 mb-4">
         <input
           type="url"
@@ -108,13 +145,13 @@ export const ImageBlockEdit: React.FC<BlockEditProps<ImageBlockData>> = ({
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           onClick={handleSave}
         >
-          Save
+          Save (⌘+Enter)
         </button>
         <button
           className="px-4 py-2 border rounded hover:bg-gray-100"
-          onClick={onCancel}
+          onClick={handleCancel}
         >
-          Cancel
+          Cancel (Esc)
         </button>
       </div>
     </div>
@@ -137,8 +174,8 @@ export const imageBlockConfig: BlockConfig<ImageBlockData> = {
       return false;
     }
   },
-  onSave: async (block) => {
+  onSave: fn().mockImplementation(async (block) => {
     console.log('Saving image block:', block);
     await new Promise(resolve => setTimeout(resolve, 500));
-  },
+  }),
 };
