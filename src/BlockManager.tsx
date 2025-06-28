@@ -18,6 +18,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 import { useBlockStore } from './store';
 import type { Block, BlockManagerProps, BlockConfig } from './types';
+import { DragDropError, BlockLimitError } from './errors';
 import { sortBlocksByOrder } from './utils';
 
 // Individual sortable block component
@@ -156,23 +157,35 @@ export function BlockManager<T = unknown>({
   // Handle drag end
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
-      const { active, over } = event;
+      try {
+        const { active, over } = event;
 
-      if (over && active.id !== over.id) {
-        const activeBlock = blocks.find(b => b.id === active.id);
-        const overBlock = blocks.find(b => b.id === over.id);
+        if (over && active.id !== over.id) {
+          const activeBlock = blocks.find(b => b.id === active.id);
+          const overBlock = blocks.find(b => b.id === over.id);
 
-        if (activeBlock && overBlock) {
+          if (!activeBlock || !overBlock) {
+            throw new DragDropError('Invalid drag operation: blocks not found');
+          }
+
           store.moveBlock(activeBlock.id, overBlock.order);
         }
+      } catch (error) {
+        onError?.(error as Error);
       }
     },
-    [blocks, store]
+    [blocks, store, onError]
   );
 
   // Add new block
   const handleAddBlock = useCallback(() => {
     try {
+      if (!canAdd) {
+        const config = store.configs.get(type);
+        const limit = config?.maxBlocks || 0;
+        throw new BlockLimitError(type, limit);
+      }
+      
       const blockId = store.addBlock(type);
       if (blockId) {
         // Auto-focus new block
@@ -183,7 +196,7 @@ export function BlockManager<T = unknown>({
     } catch (error) {
       onError?.(error as Error);
     }
-  }, [store, type, onError]);
+  }, [store, type, canAdd, onError]);
 
   // Handle keyboard navigation between blocks
   const handleContainerKeyDown = useCallback(

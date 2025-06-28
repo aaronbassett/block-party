@@ -1,5 +1,10 @@
 import type { Block, BlockState } from './types';
 
+// ID generation
+export const generateId = (): string => {
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
 // Block state helpers
 export const isBlockEmpty = (block: Block): boolean => {
   return block.state === 'empty';

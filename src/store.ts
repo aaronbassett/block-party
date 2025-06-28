@@ -1,5 +1,14 @@
 import { create } from 'zustand';
 import type { Block, BlockConfig, BlockState } from './types';
+import { generateId } from './utils';
+import {
+  ConfigNotFoundError,
+  BlockNotFoundError,
+  BlockLimitError,
+  BlockSaveError,
+  BlockValidationError,
+  BlockEditError,
+} from './errors';
 
 interface BlockStore {
   // State
@@ -66,7 +75,7 @@ export const useBlockStore = create<BlockStore>((set, get) => ({
     const config = state.configs.get(type);
 
     if (!config) {
-      throw new Error(`Config not found for block type: ${type}`);
+      throw new ConfigNotFoundError(type);
     }
 
     // Check block limit
@@ -76,7 +85,7 @@ export const useBlockStore = create<BlockStore>((set, get) => ({
     }
 
     // Create new block
-    const id = generateBlockId();
+    const id = generateId();
     const now = Date.now();
     const blocks = Array.from(state.blocks.values());
     const maxOrder = blocks.reduce(
@@ -97,7 +106,7 @@ export const useBlockStore = create<BlockStore>((set, get) => ({
 
     // Validate if validator exists
     if (config.validate && !config.validate(newBlock.data)) {
-      throw new Error('Invalid default data for block');
+      throw new BlockValidationError(id, newBlock.data);
     }
 
     set(state => {
@@ -237,18 +246,25 @@ export const useBlockStore = create<BlockStore>((set, get) => ({
     const block = state.blocks.get(id);
     const config = block ? state.configs.get(block.type) : undefined;
 
-    if (!block || !config) {
-      throw new Error('Block or config not found');
+    if (!block) {
+      throw new BlockNotFoundError(id);
+    }
+    if (!config) {
+      throw new ConfigNotFoundError(block.type);
     }
 
     // Validate if validator exists
     if (config.validate && !config.validate(block.data)) {
-      throw new Error('Block data validation failed');
+      throw new BlockValidationError(id, block.data);
     }
 
     // Call onSave if provided
     if (config.onSave) {
-      await config.onSave(block);
+      try {
+        await config.onSave(block);
+      } catch (error) {
+        throw new BlockSaveError(id, error);
+      }
     }
 
     // Update block state

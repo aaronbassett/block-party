@@ -175,10 +175,68 @@ const uniqueId = generateId(); // Returns a unique string ID`} />
 
 ## Error Handling
 
-Block Party throws standard Error objects for all error conditions. Common errors:
+Block Party provides custom error classes that extend from `BlockPartyError` for better debugging:
 
-- `"No config registered for type: {type}"` - Block type not registered
-- `"Cannot add more blocks of type: {type}"` - Block limit reached
-- `"Block not found: {id}"` - Invalid block ID
+### Error Classes
 
-Always wrap BlockManager with error boundaries or use the `onError` prop for graceful error handling.
+<Source language="typescript" code={`// Base error class
+class BlockPartyError extends Error
+
+// Specific error types
+class ConfigNotFoundError extends BlockPartyError {
+  type: string; // The block type that wasn't found
+}
+
+class BlockNotFoundError extends BlockPartyError {
+  id: string; // The block ID that wasn't found
+}
+
+class BlockLimitError extends BlockPartyError {
+  type: string; // Block type
+  limit: number; // Maximum allowed
+}
+
+class BlockValidationError extends BlockPartyError {
+  id: string; // Block ID
+  data: unknown; // The invalid data
+}
+
+class BlockSaveError extends BlockPartyError {
+  id: string; // Block ID
+  cause: unknown; // Original error
+}
+
+class DragDropError extends BlockPartyError {
+  reason: string; // Description of what went wrong
+}
+
+class InvalidBlockDataError extends BlockPartyError {
+  id: string; // Block ID
+  reason: string; // Why the data is invalid
+}
+
+class BlockEditError extends BlockPartyError {
+  id: string; // Block ID
+  reason: string; // Why editing failed
+}`} />
+
+### Example Usage
+
+<Source language="tsx" code={`import { BlockManager, BlockLimitError, BlockSaveError } from 'block-party';
+
+<BlockManager
+  type="text"
+  config={config}
+  onError={(error) => {
+    if (error instanceof BlockLimitError) {
+      alert(\`Cannot add more than \${error.limit} blocks of type "\${error.type}"\`);
+    } else if (error instanceof BlockSaveError) {
+      console.error('Save failed:', error.cause);
+      alert('Failed to save block. Please try again.');
+    } else {
+      console.error('Unexpected error:', error);
+    }
+  }}
+/>`} />
+
+Always use the `onError` prop or wrap BlockManager with error boundaries for graceful error handling.
