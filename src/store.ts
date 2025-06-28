@@ -4,10 +4,8 @@ import { generateId } from './utils';
 import {
   ConfigNotFoundError,
   BlockNotFoundError,
-  BlockLimitError,
   BlockSaveError,
   BlockValidationError,
-  BlockEditError,
 } from './errors';
 
 interface BlockStore {
@@ -41,9 +39,6 @@ interface BlockStore {
   // Utility methods
   reset: () => void;
 }
-
-let blockIdCounter = 0;
-const generateBlockId = () => `block-${Date.now()}-${++blockIdCounter}`;
 
 export const useBlockStore = create<BlockStore>((set, get) => ({
   // Initial state

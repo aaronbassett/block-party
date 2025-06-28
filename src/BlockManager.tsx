@@ -151,7 +151,9 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
             ? config.renderEdit({
                 block,
                 onChange: handleChange,
-                onSave: handleSave,
+                onSave: () => {
+                  void handleSave();
+                },
                 onCancel: handleCancel,
               })
             : config.renderView({
