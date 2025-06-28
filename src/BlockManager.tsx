@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback, KeyboardEvent } from 'react';
+import React, { useEffect, useRef, useCallback, KeyboardEvent, useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -15,6 +15,16 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import {
+  useFloating,
+  useHover,
+  useInteractions,
+  safePolygon,
+  offset,
+  shift,
+  flip,
+  autoUpdate,
+} from '@floating-ui/react';
 
 import { useBlockStore } from './store';
 import type { Block, BlockManagerProps, BlockConfig } from './types';
@@ -31,6 +41,7 @@ interface SortableBlockProps<T = unknown> {
 function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
   const store = useBlockStore();
   const blockRef = useRef<HTMLDivElement>(null);
+  const [showHandle, setShowHandle] = useState(false);
 
   const {
     attributes,
@@ -39,13 +50,37 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: block.id });
+  } = useSortable({ 
+    id: block.id,
+    disabled: block.isEditing 
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  // Setup floating UI for drag handle
+  const { refs, floatingStyles, context } = useFloating({
+    open: showHandle && !block.isEditing,
+    onOpenChange: setShowHandle,
+    placement: 'left',
+    middleware: [
+      offset(10),
+      shift({ padding: 10 }),
+      flip(),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
+
+  const hover = useHover(context, {
+    handleClose: safePolygon(),
+  });
+
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    hover,
+  ]);
 
   // Handle keyboard events for edit mode
   const handleKeyDown = useCallback(
@@ -95,32 +130,58 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
   }, [block.isEditing]);
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="block-container"
-      tabIndex={block.isEditing ? -1 : 0}
-      onKeyDown={handleKeyDown}
-      onClick={handleClick}
-      role="article"
-      aria-label={`${config.displayName} ${block.order + 1}`}
-    >
-      <div ref={blockRef}>
-        {block.isEditing
-          ? config.renderEdit({
-              block,
-              onChange: handleChange,
-              onSave: handleSave,
-              onCancel: handleCancel,
-            })
-          : config.renderView({
-              block,
-              isDragging,
-            })}
+    <>
+      <div
+        ref={(node) => {
+          setNodeRef(node);
+          refs.setReference(node);
+        }}
+        style={style}
+        {...attributes}
+        {...getReferenceProps()}
+        className="block-container"
+        tabIndex={block.isEditing ? -1 : 0}
+        onKeyDown={handleKeyDown}
+        onClick={handleClick}
+        role="article"
+        aria-label={`${config.displayName} ${block.order + 1}`}
+      >
+        <div ref={blockRef}>
+          {block.isEditing
+            ? config.renderEdit({
+                block,
+                onChange: handleChange,
+                onSave: handleSave,
+                onCancel: handleCancel,
+              })
+            : config.renderView({
+                block,
+                isDragging,
+              })}
+        </div>
       </div>
-    </div>
+      
+      {showHandle && !block.isEditing && (
+        <div
+          ref={refs.setFloating}
+          style={floatingStyles}
+          {...getFloatingProps()}
+          className="drag-handle"
+          {...listeners}
+          aria-label="Drag to reorder"
+        >
+          <svg 
+            width="20" 
+            height="20" 
+            viewBox="0 0 20 20" 
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 10a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 10a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+          </svg>
+        </div>
+      )}
+    </>
   );
 }
 

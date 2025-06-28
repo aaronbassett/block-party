@@ -4,6 +4,7 @@ import { BlockManager } from '../src/BlockManager';
 import { textBlockConfig } from './examples/TextBlock';
 import { imageBlockConfig } from './examples/ImageBlock';
 import { codeBlockConfig } from './examples/CodeBlock';
+import './styles/drag-handle.css';
 
 const meta = {
   title: 'Components/BlockManager',
@@ -142,6 +143,7 @@ export const CustomStyling: Story = {
             border-radius: 8px;
             padding: 1rem;
             transition: all 0.2s;
+            position: relative;
           }
           
           .custom-block-manager .block-container:hover {
@@ -152,6 +154,34 @@ export const CustomStyling: Story = {
           .custom-block-manager .block-container[aria-grabbed="true"] {
             opacity: 0.5;
             transform: scale(0.98);
+          }
+          
+          .custom-block-manager .drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            color: #9ca3af;
+            cursor: grab;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+          }
+          
+          .custom-block-manager .drag-handle:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #6b7280;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
+          
+          .custom-block-manager .drag-handle:active {
+            cursor: grabbing;
+            transform: scale(0.95);
           }
           
           .custom-block-manager .add-block-button {
