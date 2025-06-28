@@ -235,7 +235,7 @@ All errors extend from \`BlockPartyError\` and provide specific context about wh
 ## Usage
 
 \`\`\`tsx
-import { BlockManager, BlockLimitError } from 'block-party';
+import { BlockManager, BlockLimitError } from '@aaronbassett/block-party';
 
 <BlockManager
   type="text"

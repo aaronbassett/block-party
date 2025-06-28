@@ -160,7 +160,7 @@ const canAdd = store.canAddBlock('text');`} />
 
 ### State Checkers
 
-<Source language="typescript" code={`import { isBlockEmpty, isBlockDirty, isBlockClean } from 'block-party';
+<Source language="typescript" code={`import { isBlockEmpty, isBlockDirty, isBlockClean } from '@aaronbassett/block-party';
 
 const block = store.getBlock(blockId);
 if (isBlockDirty(block)) {
@@ -169,7 +169,7 @@ if (isBlockDirty(block)) {
 
 ### ID Generation
 
-<Source language="typescript" code={`import { generateId } from 'block-party';
+<Source language="typescript" code={`import { generateId } from '@aaronbassett/block-party';
 
 const uniqueId = generateId(); // Returns a unique string ID`} />
 
@@ -222,7 +222,7 @@ class BlockEditError extends BlockPartyError {
 
 ### Example Usage
 
-<Source language="tsx" code={`import { BlockManager, BlockLimitError, BlockSaveError } from 'block-party';
+<Source language="tsx" code={`import { BlockManager, BlockLimitError, BlockSaveError } from '@aaronbassett/block-party';
 
 <BlockManager
   type="text"

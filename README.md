@@ -36,17 +36,17 @@ Block Party provides a flexible orchestration system for managing blocks of cont
 ## Installation
 
 ```bash
-npm install block-party
+npm install @aaronbassett/block-party
 # or
-yarn add block-party
+yarn add @aaronbassett/block-party
 # or
-pnpm add block-party
+pnpm add @aaronbassett/block-party
 ```
 
 ## Quick Start
 
 ```tsx
-import { BlockManager, useBlockStore } from 'block-party';
+import { BlockManager, useBlockStore } from '@aaronbassett/block-party';
 import type { BlockConfig, BlockEditProps, BlockRenderProps } from 'block-party';
 
 // Define your block data type
@@ -191,7 +191,7 @@ const canAdd = store.canAddBlock('text');
 Here's a more complete example with multiple block types:
 
 ```tsx
-import { BlockManager, useBlockStore } from 'block-party';
+import { BlockManager, useBlockStore } from '@aaronbassett/block-party';
 import type { BlockConfig } from 'block-party';
 
 // Text block implementation
