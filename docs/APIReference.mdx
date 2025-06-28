@@ -1,0 +1,184 @@
+import { Meta, Source } from '@storybook/blocks';
+
+<Meta title="API Reference" />
+
+# API Reference
+
+Complete API documentation for Block Party.
+
+## Types
+
+### `Block<T>`
+
+Core block interface with state management:
+
+<Source language="typescript" code={`interface Block<T = unknown> {
+  id: string;
+  type: string;
+  data: T;
+  order: number;
+  state: 'empty' | 'dirty' | 'clean';
+  isEditing: boolean;
+  createdAt: number;
+  updatedAt: number;
+  savedAt?: number;
+}`} />
+
+### `BlockConfig<T>`
+
+Configuration for each block type:
+
+<Source language="typescript" code={`interface BlockConfig<T = unknown> {
+  type: string;
+  displayName: string;
+  maxBlocks?: number;
+  
+  // Render functions
+  renderView: (props: BlockRenderProps<T>) => ReactElement;
+  renderEdit: (props: BlockEditProps<T>) => ReactElement;
+  
+  // Lifecycle functions
+  createDefault: () => T;
+  validate?: (data: T) => boolean;
+  onSave?: (block: Block<T>) => Promise<void>;
+}`} />
+
+### `BlockRenderProps<T>`
+
+Props passed to view components:
+
+<Source language="typescript" code={`interface BlockRenderProps<T = unknown> {
+  block: Block<T>;
+  onEdit: () => void;
+  isFocused: boolean;
+}`} />
+
+### `BlockEditProps<T>`
+
+Props passed to edit components:
+
+<Source language="typescript" code={`interface BlockEditProps<T = unknown> {
+  block: Block<T>;
+  onChange: (data: T) => void;
+  onSave: () => void;
+  onCancel: () => void;
+}`} />
+
+## Components
+
+### `<BlockManager>`
+
+Main component for managing blocks of a specific type.
+
+#### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `type` | `string` | **Required.** Block type identifier |
+| `config` | `BlockConfig<T>` | **Required.** Block configuration |
+| `className` | `string` | Optional CSS class name |
+| `onError` | `(error: Error) => void` | Optional error handler |
+
+#### Example
+
+<Source language="tsx" code={`<BlockManager
+  type="text"
+  config={blockConfig}
+  className="my-blocks"
+  onError={(error) => console.error(error)}
+/>`} />
+
+## Store
+
+Access the global block store using the `useBlockStore` hook.
+
+### Store Methods
+
+#### `registerConfig(config: BlockConfig)`
+Register a block configuration. Called automatically by BlockManager.
+
+#### `unregisterConfig(type: string)`
+Unregister a block configuration.
+
+#### `addBlock(type: string): string | null`
+Add a new block. Returns block ID or null if limit reached.
+
+#### `removeBlock(id: string)`
+Remove a block by ID.
+
+#### `updateBlockData(id: string, data: unknown)`
+Update block data and mark as dirty.
+
+#### `enableBlockEdit(id: string)`
+Enable edit mode for a block (disables others).
+
+#### `disableBlockEdit(id: string)`
+Disable edit mode for a block.
+
+#### `saveBlock(id: string): Promise<void>`
+Save a block and mark as clean.
+
+#### `moveBlock(id: string, newOrder: number)`
+Move a block to a new position.
+
+#### `getBlock(id: string): Block | undefined`
+Get a block by ID.
+
+#### `getBlocksByType(type: string): Block[]`
+Get all blocks of a specific type, sorted by order.
+
+#### `getEditingBlock(): Block | undefined`
+Get the currently editing block.
+
+#### `canAddBlock(type: string): boolean`
+Check if more blocks of a type can be added.
+
+#### `reset()`
+Reset the store to initial state.
+
+### Example Usage
+
+<Source language="tsx" code={`const store = useBlockStore();
+
+// Add a block
+const blockId = store.addBlock('text');
+
+// Update block data
+store.updateBlockData(blockId, { content: 'Hello' });
+
+// Enable edit mode (disables others)
+store.enableBlockEdit(blockId);
+
+// Save block
+await store.saveBlock(blockId);
+
+// Query blocks
+const textBlocks = store.getBlocksByType('text');
+const canAdd = store.canAddBlock('text');`} />
+
+## Utility Functions
+
+### State Checkers
+
+<Source language="typescript" code={`import { isBlockEmpty, isBlockDirty, isBlockClean } from 'block-party';
+
+const block = store.getBlock(blockId);
+if (isBlockDirty(block)) {
+  console.log('Block has unsaved changes');
+}`} />
+
+### ID Generation
+
+<Source language="typescript" code={`import { generateId } from 'block-party';
+
+const uniqueId = generateId(); // Returns a unique string ID`} />
+
+## Error Handling
+
+Block Party throws standard Error objects for all error conditions. Common errors:
+
+- `"No config registered for type: {type}"` - Block type not registered
+- `"Cannot add more blocks of type: {type}"` - Block limit reached
+- `"Block not found: {id}"` - Invalid block ID
+
+Always wrap BlockManager with error boundaries or use the `onError` prop for graceful error handling.

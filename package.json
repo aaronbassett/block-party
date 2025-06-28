@@ -17,7 +17,9 @@
     "semantic-release": "semantic-release",
     "test:watch": "jest --watch",
     "test": "jest --coverage",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build -o docs-build"
   },
   "repository": {
     "type": "git",
@@ -61,6 +63,14 @@
   "devDependencies": {
     "@ryansonshine/commitizen": "^4.2.8",
     "@ryansonshine/cz-conventional-changelog": "^3.3.4",
+    "@storybook/addon-docs": "^8.6.14",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/addon-links": "^8.6.14",
+    "@storybook/blocks": "^8.6.14",
+    "@storybook/react": "^8.6.14",
+    "@storybook/react-vite": "^8.6.14",
+    "@storybook/test": "^8.6.14",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.6.1",
@@ -70,6 +80,7 @@
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^4.22.0",
     "@typescript-eslint/parser": "^4.22.0",
+    "@vitejs/plugin-react": "^4.6.0",
     "conventional-changelog-conventionalcommits": "^5.0.0",
     "eslint": "^7.25.0",
     "eslint-config-prettier": "^8.3.0",
@@ -82,9 +93,11 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "semantic-release": "^21.0.1",
+    "storybook": "^8.6.14",
     "ts-jest": "^27.0.5",
     "ts-node": "^10.2.1",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.4",
+    "vite": "^6.3.5"
   },
   "config": {
     "commitizen": {

@@ -1,0 +1,119 @@
+import { Meta, Source } from '@storybook/blocks';
+
+<Meta title="Quick Start" />
+
+# Quick Start
+
+Get up and running with Block Party in minutes.
+
+## Installation
+
+<Source language="bash" code={`npm install block-party
+# or
+yarn add block-party
+# or
+pnpm add block-party`} />
+
+## Basic Example
+
+Here's a minimal example to get you started:
+
+<Source language="tsx" code={`import { BlockManager, useBlockStore } from 'block-party';
+import type { BlockConfig, BlockEditProps, BlockRenderProps } from 'block-party';
+
+// Define your block data type
+interface TextBlockData {
+  content: string;
+}
+
+// Create view component
+const TextBlockView: React.FC<BlockRenderProps<TextBlockData>> = ({ block }) => (
+  <div>{block.data.content || 'Click to edit...'}</div>
+);
+
+// Create edit component
+const TextBlockEdit: React.FC<BlockEditProps<TextBlockData>> = ({
+  block,
+  onChange,
+  onSave,
+  onCancel,
+}) => (
+  <div>
+    <input
+      value={block.data.content}
+      onChange={(e) => onChange({ content: e.target.value })}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onSave();
+        if (e.key === 'Escape') onCancel();
+      }}
+    />
+    <button onClick={onSave}>Save</button>
+    <button onClick={onCancel}>Cancel</button>
+  </div>
+);
+
+// Create block configuration
+const textBlockConfig: BlockConfig<TextBlockData> = {
+  type: 'text',
+  displayName: 'Text Block',
+  maxBlocks: 5,
+  renderView: (props) => <TextBlockView {...props} />,
+  renderEdit: (props) => <TextBlockEdit {...props} />,
+  createDefault: () => ({ content: '' }),
+  validate: (data) => data.content.length <= 1000,
+  onSave: async (block) => {
+    // Optional: persist to backend
+    console.log('Saving block:', block);
+  },
+};
+
+// Use in your app
+function App() {
+  return (
+    <BlockManager
+      type="text"
+      config={textBlockConfig}
+      onError={(error) => console.error(error)}
+    />
+  );
+}`} />
+
+## Key Concepts
+
+### 1. Block Configuration
+
+Each block type needs a configuration object that defines:
+
+- **type**: Unique identifier for the block type
+- **displayName**: Human-readable name
+- **maxBlocks**: Optional limit on number of blocks
+- **renderView**: Component to render in view mode
+- **renderEdit**: Component to render in edit mode
+- **createDefault**: Function to create default data
+- **validate**: Optional validation function
+- **onSave**: Optional save handler
+
+### 2. Block States
+
+Blocks have three states:
+
+- **empty**: New block with default data
+- **dirty**: Block has unsaved changes
+- **clean**: Block has been saved
+
+### 3. Single Edit Mode
+
+Only one block can be in edit mode at a time across your entire application. When a user starts editing a block, any other block being edited is automatically saved or cancelled.
+
+### 4. Keyboard Navigation
+
+- **Tab/Shift+Tab**: Navigate between blocks
+- **Enter**: Enter edit mode on focused block
+- **Escape**: Cancel editing (in your edit component)
+- **Cmd/Ctrl+S**: Save block (in your edit component)
+
+## Next Steps
+
+- Explore the [API Reference](/?path=/docs/api-reference--docs) for detailed documentation
+- Check out [Examples](/?path=/docs/examples-text-blocks--docs) for more complex use cases
+- Learn about [Styling](/?path=/docs/styling--docs) your blocks
