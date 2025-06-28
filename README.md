@@ -8,9 +8,11 @@ Block Party provides a flexible orchestration system for managing blocks of cont
 
 - 🎯 **Single Edit Mode** - Only one block can be edited at a time across all managers
 - 🚫 **Block Limits** - Enforce maximum blocks per type
-- 🔄 **Drag & Drop** - Reorder blocks with keyboard and mouse support
+- 🔄 **Drag & Drop** - Reorder blocks with dedicated drag handles that appear on hover
 - 📦 **State Tracking** - Track block states: empty, dirty, clean
 - ⌨️ **Keyboard Navigation** - Full keyboard support with Tab/Enter
+- 🎨 **Unstyled** - Bring your own styles, no CSS included
+- 🛡️ **Type Safe** - Full TypeScript support with generics
 - 🪶 **Lightweight** - ~400 lines of code, minimal dependencies
 - 🔌 **Flexible** - Bring your own block implementations
 
@@ -22,6 +24,7 @@ Block Party provides a flexible orchestration system for managing blocks of cont
 - Coordinates focus navigation between blocks
 - Provides a clean API for adding, removing, and updating blocks
 - Handles block reordering with drag & drop
+- Provides custom error classes for better debugging
 
 ## What This Library Does NOT Do
 

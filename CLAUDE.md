@@ -43,12 +43,13 @@ This is a lean TypeScript package with minimal structure:
   - `src/store.ts` - Single Zustand store managing all block state
   - `src/BlockManager.tsx` - React component with drag & drop
   - `src/utils.ts` - Helper functions
+  - `src/errors.ts` - Custom error classes for better debugging
   - `src/index.ts` - All exports
 
 - **Key Design Decisions**:
   - Single store pattern (no separate block/page stores)
   - Minimal types (Block, BlockConfig, render props)
-  - No custom error classes (use standard Error)
+  - Custom error classes for specific scenarios (BlockValidationError, BlockSaveError, etc.)
   - Direct event handling (no complex focus management)
   - Unstyled components (consumers handle styling)
 
