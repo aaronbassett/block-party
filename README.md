@@ -360,6 +360,44 @@ const MyBlockEdit: React.FC<BlockEditProps<MyBlockData>> = ({ block, onChange })
 };
 ```
 
+## Publishing
+
+This package is automatically published to npm when changes are merged to the `main` branch. The release process uses [semantic-release](https://github.com/semantic-release/semantic-release) to:
+
+1. Analyze commit messages to determine the next version
+2. Generate release notes from commit messages
+3. Publish to npm
+4. Create a GitHub release
+
+### Commit Message Format
+
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+- `feat:` - New features (triggers minor version bump)
+- `fix:` - Bug fixes (triggers patch version bump)
+- `docs:` - Documentation changes (no release)
+- `chore:` - Maintenance tasks (no release)
+- `refactor:` - Code refactoring (no release)
+- `test:` - Test changes (no release)
+
+Breaking changes should include `BREAKING CHANGE:` in the commit body or append `!` to the type (e.g., `feat!:`).
+
+### Setup for Publishing
+
+1. **Add NPM Token**: Go to your repository settings on GitHub and add a secret named `NPM_TOKEN` with your npm authentication token.
+
+2. **Ensure Main Branch Protection**: The release workflow runs on pushes to `main`, so protect your main branch and use pull requests.
+
+### Manual Publishing
+
+If you need to publish manually:
+
+```bash
+npm run clean
+npm run build
+npm publish
+```
+
 ## License
 
 MIT © Aaron Bassett

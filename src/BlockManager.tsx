@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useCallback, KeyboardEvent, useState } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useCallback,
+  KeyboardEvent,
+  useState,
+} from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -50,9 +56,9 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: block.id,
-    disabled: block.isEditing 
+    disabled: block.isEditing,
   });
 
   const style = {
@@ -66,11 +72,7 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
     open: showHandle && !block.isEditing,
     onOpenChange: setShowHandle,
     placement: 'left',
-    middleware: [
-      offset(10),
-      shift({ padding: 10 }),
-      flip(),
-    ],
+    middleware: [offset(10), shift({ padding: 10 }), flip()],
     whileElementsMounted: autoUpdate,
   });
 
@@ -78,9 +80,7 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
     handleClose: safePolygon(),
   });
 
-  const { getReferenceProps, getFloatingProps } = useInteractions([
-    hover,
-  ]);
+  const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
   // Handle keyboard events for edit mode
   const handleKeyDown = useCallback(
@@ -132,7 +132,7 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
   return (
     <>
       <div
-        ref={(node) => {
+        ref={node => {
           setNodeRef(node);
           refs.setReference(node);
         }}
@@ -160,7 +160,7 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
               })}
         </div>
       </div>
-      
+
       {showHandle && !block.isEditing && (
         <div
           ref={refs.setFloating}
@@ -170,10 +170,10 @@ function SortableBlock<T>({ block, config, onError }: SortableBlockProps<T>) {
           {...listeners}
           aria-label="Drag to reorder"
         >
-          <svg 
-            width="20" 
-            height="20" 
-            viewBox="0 0 20 20" 
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
           >
@@ -246,7 +246,7 @@ export function BlockManager<T = unknown>({
         const limit = config?.maxBlocks || 0;
         throw new BlockLimitError(type, limit);
       }
-      
+
       const blockId = store.addBlock(type);
       if (blockId) {
         // Auto-focus new block
