@@ -7,10 +7,10 @@ module.exports = {
     '!<rootDir>/src/index.ts',
   ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
-  globals: {
-    'ts-jest': {
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {
       diagnostics: false,
       isolatedModules: true,
-    },
+    }],
   },
 };
