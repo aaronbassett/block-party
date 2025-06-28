@@ -1,0 +1,237 @@
+import { Meta, Source } from '@storybook/blocks';
+
+<Meta title="Styling" />
+
+# Styling
+
+Block Party is completely unstyled by default, giving you full control over the appearance of your blocks.
+
+## CSS Classes
+
+The BlockManager component applies these CSS classes that you can target:
+
+### Container Classes
+
+- `.block-container` - Each block wrapper
+- `.add-block-button` - The "Add Block" button
+
+### State Classes
+
+- `.block-container[aria-grabbed="true"]` - Block being dragged
+- `.block-container:focus` - Focused block
+
+## Basic Styling Example
+
+<Source language="css" code={`.block-container {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.block-container:focus {
+  outline: 2px solid blue;
+  outline-offset: 2px;
+}
+
+.block-container:hover {
+  border-color: #666;
+}
+
+.block-container[aria-grabbed="true"] {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.add-block-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border: 2px dashed #ccc;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.2s;
+}
+
+.add-block-button:hover {
+  border-color: #666;
+  background: #f5f5f5;
+}
+
+.add-block-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}`} />
+
+## Tailwind CSS Example
+
+<Source language="tsx" code={`<BlockManager
+  type="text"
+  config={textBlockConfig}
+  className="space-y-4"
+/>`} />
+
+<Source language="css" code={`/* With Tailwind utilities */
+.block-container {
+  @apply bg-white border border-gray-200 rounded-lg p-4 
+         cursor-pointer transition-all duration-200
+         hover:border-blue-400 hover:shadow-md
+         focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.block-container[aria-grabbed="true"] {
+  @apply opacity-50 scale-95;
+}
+
+.add-block-button {
+  @apply mt-4 w-full py-3 px-4 
+         border-2 border-dashed border-gray-300 
+         bg-transparent rounded-lg
+         text-gray-600 font-medium
+         hover:border-gray-400 hover:bg-gray-50
+         disabled:opacity-50 disabled:cursor-not-allowed
+         transition-all duration-200;
+}`} />
+
+## CSS-in-JS Example
+
+<Source language="tsx" code={`import styled from 'styled-components';
+
+const StyledBlockManager = styled.div\`
+  .block-container {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #2196f3;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: #1976d2;
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+    }
+
+    &[aria-grabbed="true"] {
+      opacity: 0.6;
+      transform: scale(0.98);
+    }
+  }
+
+  .add-block-button {
+    width: 100%;
+    padding: 12px 24px;
+    border: 2px dashed #ccc;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 16px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: #999;
+      background: #f5f5f5;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+\`;
+
+// Usage
+<StyledBlockManager>
+  <BlockManager type="text" config={textBlockConfig} />
+</StyledBlockManager>`} />
+
+## Dark Mode Support
+
+<Source language="css" code={`/* Light mode (default) */
+.block-container {
+  background: white;
+  border: 1px solid #e0e0e0;
+  color: #333;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .block-container {
+    background: #1e1e1e;
+    border: 1px solid #404040;
+    color: #e0e0e0;
+  }
+  
+  .block-container:hover {
+    border-color: #606060;
+  }
+  
+  .add-block-button {
+    border-color: #404040;
+    color: #e0e0e0;
+  }
+  
+  .add-block-button:hover {
+    background: #2a2a2a;
+  }
+}`} />
+
+## Animation Examples
+
+### Smooth Reordering
+
+<Source language="css" code={`.block-container {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.block-container[aria-grabbed="true"] {
+  transform: scale(0.95) rotate(2deg);
+  opacity: 0.8;
+}`} />
+
+### Entry Animation
+
+<Source language="css" code={`@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.block-container {
+  animation: slideIn 0.3s ease-out;
+}`} />
+
+## Best Practices
+
+1. **Focus Indicators**: Always provide clear focus indicators for accessibility
+2. **Touch Targets**: Ensure interactive elements are at least 44x44px on mobile
+3. **Color Contrast**: Maintain WCAG AA compliance (4.5:1 for normal text)
+4. **Motion**: Respect `prefers-reduced-motion` for users who prefer less animation
+5. **States**: Clearly indicate hover, focus, active, and disabled states
+
+<Source language="css" code={`/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .block-container {
+    transition: none;
+  }
+  
+  @keyframes slideIn {
+    from, to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}`} />

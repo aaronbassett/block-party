@@ -1,0 +1,52 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Introduction" />
+
+# Block Party 🎉
+
+> Lean block orchestration library for React - manages content blocks with single edit mode, limits, and drag & drop
+
+## Overview
+
+Block Party provides a flexible orchestration system for managing blocks of content in React applications. It handles the coordination of multiple block types, enforces single edit mode across all blocks, manages block limits per type, and provides a clean API for external components to interact with blocks.
+
+### Key Features
+
+- 🎯 **Single Edit Mode** - Only one block can be edited at a time across all managers
+- 🚫 **Block Limits** - Enforce maximum blocks per type
+- 🔄 **Drag & Drop** - Reorder blocks with keyboard and mouse support
+- 📦 **State Tracking** - Track block states: empty, dirty, clean
+- ⌨️ **Keyboard Navigation** - Full keyboard support with Tab/Enter
+- 🪶 **Lightweight** - ~400 lines of code, minimal dependencies
+- 🔌 **Flexible** - Bring your own block implementations
+
+## Philosophy
+
+Block Party follows a "lean code" philosophy:
+
+1. **Do one thing well** - Orchestrate blocks, nothing more
+2. **Minimal dependencies** - Only what's absolutely necessary
+3. **Composable** - Works with any React component
+4. **Unstyled** - Bring your own CSS
+5. **Type-safe** - Full TypeScript support
+
+## What This Library Does
+
+- Orchestrates multiple block managers on a page
+- Enforces single edit mode across all blocks
+- Manages block limits per type
+- Coordinates focus navigation between blocks
+- Provides a clean API for adding, removing, and updating blocks
+- Handles block reordering with drag & drop
+
+## What This Library Does NOT Do
+
+- Does NOT implement specific block types (that's your responsibility)
+- Does NOT handle persistence (blocks must bring their own save functions)
+- Does NOT manage block UI (blocks render themselves)
+- Does NOT validate block data (blocks handle their own validation)
+- Does NOT include any styling (completely unstyled)
+
+## Getting Started
+
+Check out the [Quick Start](/?path=/docs/quick-start--docs) guide to begin using Block Party in your project.

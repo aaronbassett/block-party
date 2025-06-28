@@ -1,0 +1,33 @@
+/* Default drag handle styles for Block Party */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #9ca3af;
+  cursor: grab;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.drag-handle:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #6b7280;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+/* Ensure block containers are positioned relative for floating UI */
+.block-container {
+  position: relative;
+}
