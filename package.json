@@ -1,5 +1,5 @@
 {
-  "name": "block-party",
+  "name": "@aaronbassett/block-party",
   "version": "0.1.0",
   "description": "Lean block orchestration library for React - manages content blocks with single edit mode, limits, and drag & drop",
   "main": "./lib/index.js",
