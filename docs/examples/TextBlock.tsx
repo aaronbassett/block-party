@@ -89,7 +89,7 @@ export const textBlockConfig: BlockConfig<TextBlockData> = {
   renderView: (props) => <TextBlockView {...props} />,
   renderEdit: (props) => <TextBlockEdit {...props} />,
   createDefault: () => ({ content: '', format: 'normal' }),
-  validate: (data) => data.content.length > 0 && data.content.length <= 5000,
+  validate: (data) => data.content.length <= 5000,
   onSave: async (block) => {
     console.log('Saving text block:', block);
     // Simulate API call

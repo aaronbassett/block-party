@@ -139,7 +139,7 @@ export const codeBlockConfig: BlockConfig<CodeBlockData> = {
   renderView: (props) => <CodeBlockView {...props} />,
   renderEdit: (props) => <CodeBlockEdit {...props} />,
   createDefault: () => ({ code: '', language: 'javascript' }),
-  validate: (data) => data.code.length > 0 && data.code.length <= 10000,
+  validate: (data) => data.code.length <= 10000,
   onSave: async (block) => {
     console.log('Saving code block:', block);
     await new Promise(resolve => setTimeout(resolve, 500));
